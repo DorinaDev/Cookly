@@ -85,14 +85,13 @@ def einkaufsliste():
 
 # Neues Rezept hinzufügen
 def neues_rezept(rezepte):
-    zutaten_liste = []
-    zubereitungs_liste = []
-    zubereitungs_dict = {}
-    zutaten_dict = {}
-
     while True: 
+        zubereitungs_dict = {}
+        zutaten_dict = {}
+
         print("Welches Rezept möchtest du hinzufügen?")
         name = input("Name: ")
+        
         print("Für wie viele Portionen ist das Rezept ausgelegt?")
         while True: 
             try:
@@ -100,46 +99,42 @@ def neues_rezept(rezepte):
                 if portionen > 0:
                     break
                 else:
-                    print("Bitte gib eine Zahl ein.")
+                    print("Bitte gib eine Zahl, größer als 0 ein.")
             except ValueError: 
-                print("Ungültige Eingabe. Bitte gib eine Zahl ein, die größer als 0 ist.")
+                print("Ungültige Eingabe. Bitte gib eine Zahl ein.")
 
         print("Wie lange dauert es das Rezept zuzubereiten?")
         zubereitungszeit = input("Zubereitungszeit: ")
+
         print("Wie verderblich sind die Zutaten für das Rezept?")
         print("Bitte gib an: 1 = Nur Konserven, 2 = Haltbares Gemüse, 3 = Leicht verderbliche Lebensmittel")
-        print("Das hilft deiner App dabei besser zu kalkukulieren, wenn du einen Wochenplan erstellen möchtest.")
+        print("Das hilft deiner App dabei, besser zu kalkukulieren, wenn du einen Wochenplan erstellen möchtest.")
         verderblichkeit = input("Verderblichkeit: ")
+
         print("Nun kannst du die Zutaten hinzufügen.")
-        
         while True: 
             zutat = input("Bitte gib eine Zutat ein (oder 'fertig', um abzuschließen): ")
             if zutat.lower() == "fertig":
                 break
-            else:
-                menge = input(f"Gib die Menge für {zutat} ein: ")
-                einheit = input(f"Gib die Einheit für {zutat} ein (z.B. g, ml, EL): ")
-                zutaten_liste.append((zutat, menge, einheit))
-
-        for zutat, menge, einheit in zutaten_liste:
+            menge = input(f"Gib die Menge für {zutat} ein: ")
+            einheit = input(f"Gib die Einheit für {zutat} ein (z.B. g, ml, EL): ")
             zutaten_dict[zutat] = (menge, einheit)
 
         print("Nun kannst du die Verarbeitungsschritte eingeben.")
+        nummer = 1
         while True: 
-            zubereitung = input("Bitte gib die Verarbeitungsschritte der Reihe nach ein (oder 'fertig', um abzuschließen): ")
-            if zubereitung.lower() == "fertig":
+            schritt = input(f"Schritt {nummer} (oder 'fertig', um abzuschließen): ")
+            if schritt.lower() == "fertig":
                 break
-            zubereitungs_liste.append(zubereitung)
-
-        for nummer, schritt in enumerate(zubereitungs_liste, start=1):
             zubereitungs_dict[nummer] = schritt
+            nummer += 1
 
         rezepte[name] = {"portionen": portionen, "zubereitungszeit": zubereitungszeit, "verderblichkeit": verderblichkeit, "zutaten": zutaten_dict, "zubereitung": zubereitungs_dict}
         
         # An dieser Stelle sollte gespeichert werden.
 
         while True:
-            print("Möchtest du ein weitere Rezept eingeben?")
+            print("Möchtest du ein weiteres Rezept eingeben?")
             print("1. Ja.")
             print("2. Nein.")
             
@@ -152,8 +147,10 @@ def neues_rezept(rezepte):
                     print("Du kehrst zurück ins Hauptmenu.")
                     hauptmenu()
                     return rezepte
+                else:
+                    print("Bitte gib 1 oder 2 an.")
             except ValueError: 
-                print("Bitte gib eine Zahl ein.")
+                print("Ungültige Eingabe. Bitte gib eine Zahl ein.")
 
 # Hauptmenü
 def hauptmenu():
