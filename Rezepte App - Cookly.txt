@@ -1,0 +1,18 @@
+Rezepte App - Cookly
+
+Was ist geplant?
+Eine App, in der man Rezepte speichern und diese dann in einer Liste mit Bildern ansehen kann. Durch Antippen soll automatisch ein Wochenplan erstellt werden, der sich an den Attributen der Gerichte orientiert. Wenn ein Gericht schnell verderbliche Zutaten enthält, wird dieses Gericht weiter oben auf dem Wochenplan stehen. 
+Aus dem vom Nutzer abgesegneten Wochenplan wird automatisch eine Einkaufliste erstellt. Diese orientiert sich an der Eingabe der angegebenen Personen, die in dieser Woche mitessen sollen. Für jeden Tag können unterschiedliche Personenzahlen angegeben werden. 
+Um neue Rezepte hinzuzufügen, kann ein Foto gemacht oder ein Foto/Screenshot aus dem Handyspeicher hochgeladen werden. Eine Texterkennung geht über das Bild und generiert daraus den neuen Rezepteintrag. Somit müssen Rezepte nicht mehr per Hand eingetragen werden. 
+
+Was brauchen wir?
+Texterkennung, um die Fotos/Screenshots auszuwerten
+Speicherfunktion für die Rezeptbibliothek
+Optisch hübsche Auflistung der Rezepte
+Automatische Wochenplanerstellung (anhand der Attribute)
+Automatische Einkaufslistenerstellung (anhand der Personenzahl)
+
+*** 
+Aktueller Stand: 
+
+20.03. Planung des Vorgehens
