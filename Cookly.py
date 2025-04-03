@@ -1,34 +1,65 @@
+import json
+
 # Rezept-Bibliothek
 rezepte = {
     "Lasagne-Suppe": {
         "portionen": 4, # Standard Portionen
-        "zubereitungszeit": "30 Min.",
+        "zubereitungszeit": "45 Min.",
         "verderblichkeit": "2", # Wert zwischen 1-3 (1 = Nur Konserven, 2 = Haltbares Gemüse, 3 = Leicht verderbliche Lebensmittel)
         "zutaten": {
-            "Zwiebel": (1, ""),
-            "Knoblauch": (1, ""),
-            "Paprika": (1, ""),
-            "Karotte": (1, ""),
-            "Öl": (2, "EL"),
-            "Hackfleisch": (400, "g"),
-            "Passierte Tomaten": (400, "g"),
-            "Gemüsebrühe": (500, "ml"),
-            "Lasagneblätter": (6, ""),
-            "Paprikapulver": (2, "TL"),
-            "Creme fraiche": (1, "EL"),
-            "Parmesan, gerieben": (30, "g")
+            "Kartoffeln": (7, "Stk."),
+            "Milch": (150, "ml"),
+            "Butter": (30, "g"),
+            "Pizzatomaten": (200, "g"),
+            "Bohnen": (200, "g"),
+            "Mais": (100, "g"),
+            "Reibekäse": (100,"g"),
+            "Salz+Pfeffer": (1, "Prise"),
+            "Muskat": (1, "Prise")
         },
         "zubereitung": {
-            1: "Zwiebel und Knoblauch abziehen und klein hacken. Paprika und Karotte waschen, Paprika entkernen und Karotte schälen. Beiden würfeln.",
-            2: "Zwiebeln, Knoblauch und Hackfleisch in etwas Öl anbraten. Karotte, Paprika und passierte Tomaten dazugeben und mit Gemüsebrühe aufgießen - alles gut würzen.",
-            3: "Die Lasagneblätter in Stücke brechen, einrühren und für ca. 10-15 Min. zugedeckt köcheln lassen.",
-            4: "Sobald die Lasagneblätter gar sind, die Suppe mit Creme fraiche und Parmesan verfeinern und genießen."
+            1: "Aus Kartoffeln, Milch, Butter, Salz+Pfeffer und Muskat Kartoffelbrei herstellen.",
+            2: "Die Pizzatomaten, Bohnen und Mais in eine Auflaufform geben.",
+            3: "Den Kartoffelbrei über den Tomatenmix geben und mit Käse bestreuen.",
+            4: "Die Auflaufform in den Ofen stellen und bei 180 °C Umluft für etwa 15 Min. backen, bis der Käse goldbraun ist."
         }
     }
 }
 
-Wochenplan = {} 
-Einkaufsliste = {}
+wochenplan_list = [] 
+einkaufsliste_list = []
+
+# Speicherfunktion
+def bib_speichern():
+    daten = {"rezepte": rezepte, "wochenplan": wochenplan, "einkaufsliste": einkaufsliste}
+
+    try:
+        with open("bib.json", "w", encoding="utf-8") as datei:
+            json.dump(daten, datei, indent=4)
+
+        print("Deine Rezeptbibliothek wurde gespeichert.")
+
+    except Exception as e:
+        print(f"Fehler beim Speichern: {e}.")
+
+# Bib Laden
+def bib_laden():
+    global rezepte, wochenplan, einkaufsliste
+    
+    try:
+        with open("bib.json", "r", encoding="utf-8") as datei:
+            daten = json.load(datei)
+
+        rezepte = daten.get("rezepte", {})
+        wochenplan = daten.get("wochenplan", {})
+        einkaufsliste = daten.get("einkaufsliste", {})
+
+        print("\nDeine Rezeptbibliothek wurde geladen.")
+
+    except FileNotFoundError:
+        print("\nKein gespeicherter Speicherstand gefunden.")
+    except json.JSONDecodeError:
+        print("Fehler: Die Datei ist beschädigt oder ungültig.")
 
 # Rezept-Ausgabe
 def rezept_anzeigen():
@@ -67,18 +98,81 @@ def rezept_anzeigen():
             entscheidung = input("> ").strip().lower()
             if entscheidung == "ja":
                 print(f"{wahl} wurde zum Wochenplan hinzugefügt!")
-                # Hier fehlt noch die Funktion, um es dem Wochenplan hinzuzufügen.
+                wochenplan_list.append(wahl)
+
+                print("Möchtest du ein weitere Rezept anzeigen lassen? (ja/nein)")
+                while True:
+                    try:
+                        weiteres_rezept = input("> ").lower
+                        if weiteres_rezept == "nein":
+                            break
+                        if weiteres_rezept == "ja":
+                            continue
+                        else:
+                            print("Bitte gib 'ja' oder 'nein' ein.")
+                    except ValueError:
+                        print("Ungültige Eingabe. Bitte gib 'ja' oder 'nein' ein.")
             else:
                 print("Okay, dann vielleicht später!")
 
+                print("Möchtest du ein weitere Rezept anzeigen lassen? (ja/nein)")
+                while True:
+                    try:
+                        weiteres_rezept = input("> ").lower
+                        if weiteres_rezept == "nein":
+                            break
+                        if weiteres_rezept == "ja":
+                            continue
+                        else:
+                            print("Bitte gib 'ja' oder 'nein' ein.")
+                    except ValueError:
+                        print("Ungültige Eingabe. Bitte gib 'ja' oder 'nein' ein.")
         else:
             print("Dieses Rezept befindet sich nicht in der Bibliothek. Überprüfe die Rechtschreibung.")
 
-# Wochenplan erstellen
-def wochenplan():
-    print("") # Verderblichkeit der Lebensmittel sollte berücksichtigt werden.
+tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
-# Einkaufsliste erstellen
+# Wochenplan
+def wochenplan():
+    if not wochenplan_list:
+        print("Deine Wochenplan-Liste ist noch leer.")
+        return
+    
+    print(f"Auf deiner Wochenplan-Liste befinden sich die folgenden Rezepte:") # Verderblichkeit der Lebensmittel sollte berücksichtigt werden.
+    wochenplan_dict = {i + 1: rezept for i, rezept in enumerate(wochenplan_list)}
+
+    for key, value in wochenplan_dict():
+        print(f"{key}. {value}")
+
+    auswahl = []
+
+    print("Wähle nun bis zu 7 Gerichte für deinen Wochenplan aus.")
+    while len(auswahl > 7):
+        try:
+            eingabe = input("Bitte gib die Nummer eines Gerichtes ein (oder 'fertig' wenn du genug Gerichte ausgewählt hast)\n> ")
+            if eingabe == "fertig":
+                break
+            nummer = int(eingabe)
+
+            if nummer in wochenplan_dict and wochenplan_dict[nummer] not in auswahl:
+                auswahl.append(wochenplan_dict[nummer])
+            else:
+                print("Ungültige Eingabe oder Gericht bereits ausgewählt.")
+        except ValueError: 
+            print("Bitte gib eine Zahl ein.")
+
+    while len(auswahl) < 7:
+        
+
+    auswahl.sort(key=lambda gericht: rezepte[gericht]["verderblichkeit"], reverse=True)
+
+    
+
+            #HIER GEHT ES WEITER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+# Einkaufsliste
 def einkaufsliste():
     print("")
     print("Möchtest du deine Einkaufsliste an bring! übergeben?") # Ist das möglich?
@@ -131,7 +225,7 @@ def neues_rezept(rezepte):
 
         rezepte[name] = {"portionen": portionen, "zubereitungszeit": zubereitungszeit, "verderblichkeit": verderblichkeit, "zutaten": zutaten_dict, "zubereitung": zubereitungs_dict}
         
-        # An dieser Stelle sollte gespeichert werden.
+        bib_speichern()
 
         while True:
             print("Möchtest du ein weiteres Rezept eingeben?")
@@ -186,4 +280,6 @@ def hauptmenu():
         input("\n🔄 Drücke ENTER, um zurück ins Hauptmenü zu gelangen...")
 
 # App starten
-rezept_anzeigen()
+if __name__ == "__main__":
+    bib_laden()
+    hauptmenu()
