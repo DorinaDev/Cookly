@@ -2,7 +2,7 @@ import json
 
 # Rezept-Bibliothek
 rezepte = {
-    "Lasagne-Suppe": {
+    "Shepherd's Pie": {
         "portionen": 4, # Standard Portionen
         "zubereitungszeit": "45 Min.",
         "verderblichkeit": "2", # Wert zwischen 1-3 (1 = Nur Konserven, 2 = Haltbares Gemüse, 3 = Leicht verderbliche Lebensmittel)
