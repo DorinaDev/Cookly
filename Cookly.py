@@ -130,6 +130,23 @@ def rezept_anzeigen():
         else:
             print("Dieses Rezept befindet sich nicht in der Bibliothek. Überprüfe die Rechtschreibung.")
 
+# Sortierung für den Wochenplan
+def sort_wochenplan(auswahl):
+    sortierung_verderblichkeit = sorted(auswahl, key=lambda gericht: rezepte[gericht]["verderblichkeit"], reverse=True)
+
+    finale_liste = sortierung_verderblichkeit[:]
+
+    i = 0
+    while len(finale_liste) < 7 and i < len(sortierung_verderblichkeit) - 1:
+        pos = finale_liste.index(sortierung_verderblichkeit[i])
+        finale_liste.insert(pos + 1, sortierung_verderblichkeit[i])
+        i += 1
+
+    while len(finale_liste) < 7:
+        finale_liste.append(sortierung_verderblichkeit[-1])
+
+    return finale_liste
+
 # Wochenplan
 def wochenplan():
     tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
@@ -144,9 +161,9 @@ def wochenplan():
 
     for key, value in wochenplan_dict.items():
         print(f"{key}. {value}")
-
-    print("Wähle nun bis zu 7 Gerichte für deinen Wochenplan aus.")
-    while len(auswahl < 7):
+    
+    while len(auswahl) < 7:
+        print("Wähle nun bis zu 7 Gerichte für deinen Wochenplan aus.")
         eingabe = input("Bitte gib die Nummer eines Gerichtes ein (oder 'fertig' wenn du genug Gerichte ausgewählt hast)\n> ")
             
         if eingabe.lower() == "fertig":
@@ -157,34 +174,47 @@ def wochenplan():
             
         try:
             nummer = int(eingabe)
-            if nummer in wochenplan_dict and wochenplan_dict[nummer] not in auswahl:
-                auswahl.append(wochenplan_dict[nummer])
-                print(f"Du hast {wochenplan_dict[nummer]} erfolgreich hinzugefügt.")
+            if nummer in wochenplan_dict:
+                gericht = wochenplan_dict[nummer]
+                if gericht in auswahl:
+                    print("Dieses Gericht hast du schon ausgewählt.")
+                else:
+                    auswahl.append(wochenplan_dict[nummer])
+                    print(f"Du hast {wochenplan_dict[nummer]} erfolgreich hinzugefügt.")
             else:
-                print("Ungültige Eingabe oder Gericht bereits ausgewählt.")
+                print("Diese Nummer gibt es nicht.")
         except ValueError: 
             print("Bitte gib eine Zahl ein.")
 
-    index = 0
-    while len(auswahl) < 7:
-        auswahl.append(auswahl[index])
-        index += 1
-
-    auswahl.sort(key=lambda gericht: rezepte[gericht]["verderblichkeit"], reverse=True)
+    finale_liste = sort_wochenplan(auswahl)
 
     finaler_wochenplan = {}
-    for i , tag in enumerate(tage):
-        finaler_wochenplan[tag] = auswahl[i]
+    for i, tag in enumerate(tage):
+        finaler_wochenplan[tag] = finale_liste[i]
 
     bib_speichern()
 
-    print("\nDein optimierter Wochenplan wurde erstellt:")
+    print("\n🗓️ Dein optimierter Wochenplan:\n")
     for tag, gericht in finaler_wochenplan.items():
-        print(f"{tag}: {gericht}")
+        print(f"{tag:<10}: {gericht}")
 
-# Einkaufsliste
+# Einkaufsliste (in Arbeit)
 def einkaufsliste():
-    print("")
+    global rezepte
+
+    zutaten = {}
+
+    # Abfrage der Personenzahlen
+
+    # Zutaten auf Personenzahlen abstimmen
+
+    # Zutatenliste füllen
+
+    # Ausgabe der Einkaufsliste nach Tagen
+
+    for rezept, zutat, menge in rezepte.items():
+        print(f"{menge}")
+
     print("Möchtest du deine Einkaufsliste an bring! übergeben?") # Ist das möglich?
 
 # Neues Rezept hinzufügen
