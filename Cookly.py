@@ -27,11 +27,12 @@ rezepte = {
 }
 
 wochenplan_list = [] 
-einkaufsliste_list = []
+finaler_wochenplan = {}
+einkaufsliste_list = {}
 
 # Speicherfunktion
 def bib_speichern():
-    daten = {"rezepte": rezepte, "wochenplan": wochenplan, "einkaufsliste": einkaufsliste}
+    daten = {"rezepte": rezepte, "finaler_wochenplan": finaler_wochenplan, "wochenplan": wochenplan_list, "einkaufsliste": einkaufsliste_list}
 
     try:
         with open("bib.json", "w", encoding="utf-8") as datei:
@@ -44,15 +45,16 @@ def bib_speichern():
 
 # Bib Laden
 def bib_laden():
-    global rezepte, wochenplan, einkaufsliste
+    global rezepte, finaler_wochenplan, wochenplan_list, einkaufsliste_list
     
     try:
         with open("bib.json", "r", encoding="utf-8") as datei:
             daten = json.load(datei)
 
         rezepte = daten.get("rezepte", {})
-        wochenplan = daten.get("wochenplan", {})
-        einkaufsliste = daten.get("einkaufsliste", {})
+        wochenplan_list = daten.get("wochenplan", [])
+        einkaufsliste_list = daten.get("einkaufsliste", {})
+        finaler_wochenplan = daten.get("finaler_wochenplan", {})
 
         print("\nDeine Rezeptbibliothek wurde geladen.")
 
@@ -64,7 +66,7 @@ def bib_laden():
 # Rezept-Ausgabe
 def rezept_anzeigen():
     while True: 
-        wahl = input("Welches Rezept möchtest du anzeigen lassen? \n> ").lower
+        wahl = input("Welches Rezept möchtest du anzeigen lassen? \n> ").lower()
         while True:
             try:
                 portionen = int(input("Wie viele Portionen möchtest du kochen? \n> "))
@@ -99,36 +101,23 @@ def rezept_anzeigen():
             if entscheidung == "ja":
                 print(f"{wahl} wurde zum Wochenplan hinzugefügt!")
                 wochenplan_list.append(wahl)
-
-                print("Möchtest du ein weitere Rezept anzeigen lassen? (ja/nein)")
-                while True:
-                    try:
-                        weiteres_rezept = input("> ").lower
-                        if weiteres_rezept == "nein":
-                            break
-                        if weiteres_rezept == "ja":
-                            continue
-                        else:
-                            print("Bitte gib 'ja' oder 'nein' ein.")
-                    except ValueError:
-                        print("Ungültige Eingabe. Bitte gib 'ja' oder 'nein' ein.")
             else:
                 print("Okay, dann vielleicht später!")
-
-                print("Möchtest du ein weitere Rezept anzeigen lassen? (ja/nein)")
-                while True:
-                    try:
-                        weiteres_rezept = input("> ").lower
-                        if weiteres_rezept == "nein":
-                            break
-                        if weiteres_rezept == "ja":
-                            continue
-                        else:
-                            print("Bitte gib 'ja' oder 'nein' ein.")
-                    except ValueError:
-                        print("Ungültige Eingabe. Bitte gib 'ja' oder 'nein' ein.")
         else:
             print("Dieses Rezept befindet sich nicht in der Bibliothek. Überprüfe die Rechtschreibung.")
+
+        print("Möchtest du ein weitere Rezept anzeigen lassen? (ja/nein)")
+        while True:
+            try:
+                weiteres_rezept = input("> ").lower()
+                if weiteres_rezept == "nein":
+                    return
+                if weiteres_rezept == "ja":
+                    continue
+                else:
+                    print("Bitte gib 'ja' oder 'nein' ein.")
+            except ValueError:
+                print("Ungültige Eingabe. Bitte gib 'ja' oder 'nein' ein.")
 
 # Sortierung für den Wochenplan
 def sort_wochenplan(auswahl):
@@ -149,6 +138,8 @@ def sort_wochenplan(auswahl):
 
 # Wochenplan
 def wochenplan():
+    global finaler_wochenplan
+
     tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
     auswahl = []
 
@@ -188,7 +179,6 @@ def wochenplan():
 
     finale_liste = sort_wochenplan(auswahl)
 
-    finaler_wochenplan = {}
     for i, tag in enumerate(tage):
         finaler_wochenplan[tag] = finale_liste[i]
 
@@ -199,23 +189,92 @@ def wochenplan():
         print(f"{tag:<10}: {gericht}")
 
 # Einkaufsliste (in Arbeit)
-def einkaufsliste():
-    global rezepte
+def einkaufsliste(finaler_wochenplan):
+    global rezepte, einkaufsliste_list
 
-    zutaten = {}
+    print("Hier kannst du eine Einkaufsliste für die geplanten Gerichte dieser Woche ausgeben lassen.")
 
-    # Abfrage der Personenzahlen
+    # Abfrage der Personenzahl
+    print("Zuerst musst du entscheiden, wie viele Personen an welchen Tagen mitessen sollen.")
+    print("Wie möchtest du deinen Plan erstellen? Wähle zwischen 1. und 2.")
+    print("1. Für die gesamte Woche bleibt die Personenzahl gleich.")
+    print("2. Ich möchte für jeden Tag eine andere Personenzahl angeben.")
+    
+    while True:
+        try:
+            wahl = input("> ")
+            if wahl == "1":
+                portionen_gesamt = int(input("Die Personenzahl für diese Woche lautet: "))
+                # Faktorberechnung
+                faktoren = {}
+                for tag, gericht in finaler_wochenplan.items():
+                    portionen_im_rezept = rezepte[gericht]["portionen"]
+                    faktor = portionen_gesamt / portionen_im_rezept
+                    faktoren[tag] = faktor
 
-    # Zutaten auf Personenzahlen abstimmen
+                # Zutatenmenge anhand der Portionenanzahl berechnen
+                for tag, gericht in finaler_wochenplan.items():
+                    rezept = rezepte[gericht]
+                    faktor = faktoren[tag]
 
-    # Zutatenliste füllen
+                    for zutat, (menge, einheit) in rezept["zutaten"].items():
+                        angepasste_menge = round(menge * faktor, 1)
 
-    # Ausgabe der Einkaufsliste nach Tagen
+                        if zutat in einkaufsliste_list:
+                            einkaufsliste_list[zutat][0] += angepasste_menge
+                        else:
+                            einkaufsliste_list[zutat] = [angepasste_menge, einheit]
+                print("\nDeine Einkaufsliste für diese Woche:")
+                for zutat, (menge, einheit) in einkaufsliste_list.items():
+                    print(f"- {menge} {einheit} {zutat}")
+                bib_speichern()
+                break
 
-    for rezept, zutat, menge in rezepte.items():
-        print(f"{menge}")
+            elif wahl == "2":
+                portionen_unterschied = {}
+                portionen_mo = int(input("Wie viele Personen essen am Montag mit? > "))
+                portionen_unterschied["Montag"] = portionen_mo
+                portionen_di = int(input("Wie viele Personen essen am Dienstag mit? > "))
+                portionen_unterschied["Dienstag"] = portionen_di
+                portionen_mi = int(input("Wie viele Personen essen am Mittwoch mit? > "))
+                portionen_unterschied["Mittwoch"] = portionen_mi
+                portionen_do = int(input("Wie viele Personen essen am Donnerstag mit? > "))
+                portionen_unterschied["Donnerstag"] = portionen_do
+                portionen_fr = int(input("Wie viele Personen essen am Freitag mit? > "))
+                portionen_unterschied["Freitag"] = portionen_fr
+                portionen_sa = int(input("Wie viele Personen essen am Samstag mit? > "))
+                portionen_unterschied["Samstag"] = portionen_sa
+                portionen_so = int(input("Wie viele Personen essen am Sonntag mit? > "))
+                portionen_unterschied["Sonntag"] = portionen_so
 
-    print("Möchtest du deine Einkaufsliste an bring! übergeben?") # Ist das möglich?
+                # Faktorberechnung
+                faktoren = {}
+                for tag, gericht in finaler_wochenplan.items():
+                    portionen_im_rezept = rezepte[gericht]["portionen"]
+                    faktor = portionen_unterschied[tag] / portionen_im_rezept
+                    faktoren[tag] = faktor
+
+                # Zutatenmenge anhand der Portionenanzahl berechnen
+                for tag, gericht in finaler_wochenplan.items():
+                    rezept = rezepte[gericht]
+                    faktor = faktoren[tag]
+
+                    for zutat, (menge, einheit) in rezept["zutaten"].items():
+                        angepasste_menge = round(menge * faktor, 1)
+
+                        if zutat in einkaufsliste_list:
+                            einkaufsliste_list[zutat][0] += angepasste_menge
+                        else:
+                            einkaufsliste_list[zutat] = [angepasste_menge, einheit]
+                print("\nDeine Einkaufsliste für diese Woche:")
+                for zutat, (menge, einheit) in einkaufsliste_list.items():
+                    print(f"- {menge} {einheit} {zutat}")
+                bib_speichern()
+                break
+            else:
+                print("Ungültige Eingabe. Bitte entscheide dich zwischen 1. und 2.")
+        except ValueError: 
+            print("Ungültige Eingabe. Bitte gib eine Zahl an.")
 
 # Neues Rezept hinzufügen
 def neues_rezept(rezepte):
@@ -250,7 +309,11 @@ def neues_rezept(rezepte):
             zutat = input("Bitte gib eine Zutat ein (oder 'fertig', um abzuschließen): ")
             if zutat.lower() == "fertig":
                 break
-            menge = input(f"Gib die Menge für {zutat} ein: ")
+            try:
+                menge = float(input(f"Gib die Menge für {zutat} ein: "))
+            except ValueError:
+                print("Ungültige Zahl, bitte erneut eingeben.")
+                continue
             einheit = input(f"Gib die Einheit für {zutat} ein (z.B. g, ml, EL): ")
             zutaten_dict[zutat] = (menge, einheit)
 
@@ -263,7 +326,7 @@ def neues_rezept(rezepte):
             zubereitungs_dict[nummer] = schritt
             nummer += 1
 
-        rezepte[name] = {"portionen": portionen, "zubereitungszeit": zubereitungszeit, "verderblichkeit": verderblichkeit, "zutaten": zutaten_dict, "zubereitung": zubereitungs_dict}
+        rezepte[name.lower()] = {"portionen": portionen, "zubereitungszeit": zubereitungszeit, "verderblichkeit": verderblichkeit, "zutaten": zutaten_dict, "zubereitung": zubereitungs_dict}
         
         bib_speichern()
 
@@ -286,6 +349,73 @@ def neues_rezept(rezepte):
             except ValueError: 
                 print("Ungültige Eingabe. Bitte gib eine Zahl ein.")
 
+# Wochenplan und Einkaufsliste PDF erstellen
+from fpdf import FPDF
+from datetime import datetime
+
+def pdf_wochenplan():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    datum = datetime.now().strftime("%d.%m.%Y")
+
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, f"Wochenplan ab {datum}", ln=True)
+
+    pdf.set_font("Arial", size=12)
+    for tag, gericht in finaler_wochenplan.items():
+        pdf.cell(0, 10, f"{tag}: {gericht}", ln=True)
+
+    pdf.output("Wochenplan.pdf")
+    print("PDF für den Wochenplan wurde erstellt.")
+
+def pdf_einkaufsliste():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    datum = datetime.now().strftime("%d.%m.%Y")
+
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, f"Einkaufsliste ab {datum}", ln=True)
+
+    pdf.set_font("Arial", size=12)
+    for zutat, (menge, einheit) in einkaufsliste_list.items():
+        pdf.cell(0, 10, f"{menge} {einheit} {zutat}", ln=True)
+
+    pdf.output("einkaufsliste.pdf")
+    print("PDF für die Einkaufsliste wurde erstellt.")
+
+# Check: Schon wieder Montag?
+def wochen_check():
+    import os
+
+    # Datei mit Datum bereits vorhanden?
+    letzte_woche_datei = "letzte_woche.txt"
+    heute = datetime.now()
+    aktuelle_kw = heute.isocalender()[1]
+
+    letzte_kw = None
+    if os.path.exists(letzte_woche_datei):
+        with open(letzte_woche_datei, "r") as f:
+            letzte_kw = int(f.read().strip())
+    if letzte_kw != aktuelle_kw:
+        print(f"\nEine neue Woche ist gestartet! (KW {aktuelle_kw})")
+        print("Möchtest du den alten Wochenplan und die Einkaufsliste als PDF speichern, bevor alles zurückgesetzt wird? (ja/nein)")
+        if input("> ").lower() == "ja":
+            pdf_wochenplan()
+            pdf_einkaufsliste()
+
+        # Wochenplan und Einkaufsliste zurücksetzen
+        wochenplan_list.clear()
+        finaler_wochenplan.clear()
+        einkaufsliste_list.clear()
+
+        bib_speichern()
+
+        # Neues Datum wird gespeichert
+        with open(letzte_woche_datei, "w") as f:
+            f.write(str(aktuelle_kw))
+
 # Hauptmenü
 def hauptmenu():
     while True:
@@ -303,11 +433,11 @@ def hauptmenu():
             if wahl == 1:
                 rezept_anzeigen()
             elif wahl == 2:
-                neues_rezept()
+                neues_rezept(rezepte)
             elif wahl == 3:
                 wochenplan()
             elif wahl == 4:
-                einkaufsliste()
+                einkaufsliste(finaler_wochenplan)
             elif wahl == 5:
                 print("\n👋 Du beendest die App. Bis zum nächsten Mal!")
                 break
@@ -321,5 +451,6 @@ def hauptmenu():
 
 # App starten
 if __name__ == "__main__":
+    wochen_check()
     bib_laden()
     hauptmenu()
